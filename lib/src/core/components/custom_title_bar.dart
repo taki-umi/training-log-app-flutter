@@ -1,26 +1,20 @@
 import 'package:flutter/material.dart';
 
+import 'user_icon_button.dart';
+
 // TitleBar - 画面上部のタイトルバーコンポーネント
 //
 // 画面上部のタイトルバーコンポーネントは、画面のタイトルを表示するためのコンポーネントです。
-class TitleBar extends StatelessWidget implements PreferredSizeWidget {
-  const TitleBar({super.key});
+class CustomTitleBar extends StatelessWidget implements PreferredSizeWidget {
+  const CustomTitleBar({super.key});
+
+  static const title = 'Training App(仮)';
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      leading: IconButton(
-        icon: CircleAvatar(
-          // backgroundImage: NetworkImage(photoUrl),
-          backgroundColor: Colors.white, // 背景色
-          radius: 16, // 表示したいサイズの半径を指定
-          child: Icon(Icons.person),
-        ),
-        onPressed: () {
-          // TODO: Person action
-        },
-      ),
-      title: const Text('Training App(仮)'),
+      leading: const UserIconButton(), // ユーザーアイコンボタン
+      title: Text(title),
       centerTitle: true,
       backgroundColor: Colors.red[300],
       actions: [

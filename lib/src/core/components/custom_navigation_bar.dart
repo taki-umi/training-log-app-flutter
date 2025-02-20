@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 //
 // 画面下部のナビゲーションバーコンポーネントは、画面のナビゲーションを表示するためのコンポーネントです。
 class CustomNavigationBar extends StatelessWidget {
+  // コンストラクタ
   const CustomNavigationBar({
     super.key,
     required this.currentIndex,
