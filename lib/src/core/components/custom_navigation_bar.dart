@@ -25,14 +25,19 @@ class CustomNavigationBar extends StatelessWidget {
           label: 'Dashboard',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.search),
-          label: 'Search',
+          icon: Icon(Icons.bar_chart),
+          label: 'Charts',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.timeline),
+          label: 'Timeline',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.settings),
           label: 'Settings',
         ),
       ],
+      type: BottomNavigationBarType.fixed,
     );
   }
 }

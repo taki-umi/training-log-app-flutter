@@ -49,6 +49,8 @@ class _MainLayoutState extends State<MainLayout> {
         return const Placeholder();
       case 2:
         return const Placeholder();
+      case 3:
+        return const Placeholder();
       default:
         throw UnimplementedError('no widget for $selectedIndex');
     }

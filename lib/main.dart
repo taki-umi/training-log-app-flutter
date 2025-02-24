@@ -3,6 +3,7 @@ import 'src/core/components/main_layout.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'src/features/training_add/components/training_log_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +26,11 @@ class MyApp extends StatelessWidget {
       //   primarySwatch: Colors.blue,
       // ),
       home: MainLayout(),
+      // 以下でルーティングを設定
+      routes: {
+        '/dashboard': (context) => const MainLayout(),
+        '/add_training': (context) => const TrainingLogPage(),
+      },
     );
   }
 }

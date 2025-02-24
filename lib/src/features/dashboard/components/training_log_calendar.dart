@@ -14,9 +14,11 @@ class _TrainingLogCalendarState extends State<TrainingLogCalendar> {
   // カレンダー上でマークが表示される日付
   DateTime _currentDay = DateTime.now();
 
+  // カレンダーをカードでラップした要素
   @override
   Widget build(BuildContext context) {
-    return TableCalendar(
+    return Card(
+        child: TableCalendar(
       firstDay: DateTime.utc(2000, 1, 1),
       lastDay: DateTime.utc(2030, 12, 31),
       focusedDay: _focusedDay,
@@ -27,6 +29,6 @@ class _TrainingLogCalendarState extends State<TrainingLogCalendar> {
           _focusedDay = selectedDay; // タップした際にカレンダーの表示位置を更新
         });
       }),
-    );
+    ));
   }
 }
