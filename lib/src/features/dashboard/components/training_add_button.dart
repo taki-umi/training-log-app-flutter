@@ -12,36 +12,73 @@ class TrainingAddButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return FloatingActionButton(
       backgroundColor: Colors.red[300],
+      elevation: 0,
       onPressed: () {
         showModalBottomSheet(
-            context: context,
-            builder: (context) {
-              return Container(
-                  height: 200,
-                  color: Colors.white,
-                  child: Column(
-                    children: [
-                      ListTile(
-                        leading: Icon(Icons.open_in_new),
-                        title: Text('新規追加'),
-                        onTap: () {
-                          const routeName = '/add_training';
-                          Navigator.pop(context);
-                          Navigator.pushNamed(context, routeName);
-                        },
+          context: context,
+          backgroundColor: Colors.white,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(16),
+            ),
+          ),
+          builder: (context) {
+            return Container(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.add_circle_outline),
+                    title: const Text(
+                      '新規作成',
+                      style: TextStyle(
+                        color: Colors.black87,
+                        fontWeight: FontWeight.bold,
                       ),
-                      ListTile(
-                        leading: Icon(Icons.history),
-                        title: Text('履歴から追加'),
-                        onTap: () {
-                          // Navigator.pushNamed(context, '/add_training'); // TODO: 遷移画面追加
-                        },
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.pushNamed(context, '/add_training');
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.history, color: Colors.grey[700]),
+                    title: const Text(
+                      '履歴からコピー',
+                      style: TextStyle(
+                        color: Colors.black87,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
-                  ));
-            });
+                    ),
+                    onTap: () {
+                      // TODO: 履歴からコピー機能の実装
+                      Navigator.pop(context);
+                    },
+                  ),
+                  ListTile(
+                    leading:
+                        Icon(Icons.file_copy_outlined, color: Colors.grey[700]),
+                    title: const Text(
+                      'テンプレートから作成',
+                      style: TextStyle(
+                        color: Colors.black87,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    onTap: () {
+                      // TODO: テンプレートから作成機能の実装
+                      Navigator.pop(context);
+                    },
+                  ),
+                  Divider(color: Colors.grey[200]),
+                ],
+              ),
+            );
+          },
+        );
       },
-      child: Icon(Icons.add),
+      child: const Icon(Icons.add),
     );
   }
 }

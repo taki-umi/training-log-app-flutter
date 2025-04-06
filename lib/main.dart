@@ -3,13 +3,15 @@ import 'src/core/components/main_layout.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'src/features/training_add/components/training_log_page.dart';
+import 'src/features/training_form/components/training_form_page.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await initializeDateFormatting('ja_JP');
   runApp(const MyApp());
 }
 
@@ -29,7 +31,7 @@ class MyApp extends StatelessWidget {
       // 以下でルーティングを設定
       routes: {
         '/dashboard': (context) => const MainLayout(),
-        '/add_training': (context) => const TrainingLogPage(),
+        '/add_training': (context) => const TrainingFormPage(),
       },
     );
   }
