@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:training_log_app/src/domain/model/exercise.dart';
 import 'package:training_log_app/src/domain/model/exercise_list.dart';
-import 'package:training_log_app/src/domain/model/exercise_master.dart';
+import 'package:training_log_app/src/domain/model/exercise_set.dart';
+
+// ExerciseMasterSampleクラスをインポート
+import 'package:training_log_app/src/domain/model/exercise_list.dart'
+    show ExerciseMasterSample;
 
 class ExerciseSelectionModal extends StatelessWidget {
   final ExerciseList exerciseList;
@@ -13,7 +17,7 @@ class ExerciseSelectionModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final exercises = ExerciseMaster.getExercises();
+    final exercises = ExerciseList.getSampleExercises();
 
     return Container(
       decoration: const BoxDecoration(

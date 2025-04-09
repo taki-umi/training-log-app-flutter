@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:training_log_app/src/domain/model/exercise.dart';
 import 'package:training_log_app/src/domain/model/exercise_list.dart';
+import 'package:training_log_app/src/domain/model/exercise_set.dart';
 
 class ExerciseInput extends StatelessWidget {
   final Exercise exercise;
@@ -35,14 +36,6 @@ class ExerciseInput extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.timer_outlined, size: 20),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      onPressed: () {
-                        // TODO: タイマー機能の実装
-                      },
-                    ),
                     const SizedBox(width: 8),
                     IconButton(
                       icon: const Icon(Icons.delete, size: 20),

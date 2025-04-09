@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:training_log_app/src/core/components/base_page.dart';
 import 'package:training_log_app/src/domain/model/exercise_list.dart';
+import 'package:training_log_app/src/domain/model/training_session.dart';
+import 'package:training_log_app/src/domain/service/training_session_service.dart';
 import 'package:training_log_app/src/features/training_form/components/exercise_input.dart';
 import 'package:training_log_app/src/features/training_form/components/exercise_selection_modal.dart';
+import 'package:training_log_app/src/persistence/training_firebase_repository.dart';
 import 'package:intl/intl.dart';
+import 'dart:developer' as developer;
 
 class TrainingFormPage extends BasePage {
   const TrainingFormPage({super.key});
@@ -21,11 +25,15 @@ class TrainingFormPage extends BasePage {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => ExerciseList(exerciseList: []),
+      create: (_) => ExerciseList('', exerciseList: []),
       child: Builder(
         builder: (context) {
           final exerciseList = context.watch<ExerciseList>();
           final date = DateTime.now();
+
+          // トレーニングセッションサービスを初期化
+          final repository = TrainingFirebaseRepository();
+          final service = TrainingSessionService(repository);
 
           return Scaffold(
             backgroundColor: Colors.white,
@@ -149,8 +157,73 @@ class TrainingFormPage extends BasePage {
                               borderRadius: BorderRadius.circular(8.0),
                             ),
                           ),
-                          onPressed: () {
-                            // TODO: ワークアウト完了の処理を実装
+                          onPressed: () async {
+                            if (exerciseList.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('トレーニングを追加してください'),
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                              return;
+                            }
+
+                            try {
+                              developer.log('トレーニングセッションの作成を開始',
+                                  name: 'TrainingFormPage');
+
+                              // トレーニングセッションを作成
+                              final session = TrainingSession(
+                                userId: 'USER01', // TODO: いったん仮でUSER_IDを固定
+                                trainingDate: date,
+                                startTime: '',
+                                endTime: '',
+                                exerciseList: exerciseList,
+                                notes: '',
+                                photoUrl: '',
+                              );
+
+                              developer.log('トレーニングセッションを作成しました',
+                                  name: 'TrainingFormPage');
+                              developer.log('セッションデータ: ${session.toJson()}',
+                                  name: 'TrainingFormPage');
+
+                              // Firestoreに保存
+                              developer.log('Firestoreへの保存を開始',
+                                  name: 'TrainingFormPage');
+                              await service.saveTrainingSession(session);
+                              developer.log('Firestoreへの保存が完了しました',
+                                  name: 'TrainingFormPage');
+
+                              // 成功メッセージを表示
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('トレーニングを保存しました'),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+
+                                // 前の画面に戻る
+                                Navigator.pop(context);
+                              }
+                            } catch (e, stackTrace) {
+                              developer.log(
+                                'トレーニング保存中にエラーが発生しました',
+                                name: 'TrainingFormPage',
+                                error: e,
+                                stackTrace: stackTrace,
+                              );
+
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('エラーが発生しました: $e'),
+                                    duration: const Duration(seconds: 2),
+                                  ),
+                                );
+                              }
+                            }
                           },
                           child: const Text(
                             'ワークアウト完了',

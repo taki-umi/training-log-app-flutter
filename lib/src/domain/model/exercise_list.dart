@@ -2,21 +2,31 @@
 
 import 'package:flutter/foundation.dart';
 import 'exercise.dart';
+import 'exercise_set.dart';
 
 class ExerciseList extends ChangeNotifier {
+  /// エクササイズリスト
   final List<Exercise> exerciseList;
-  final List<String> _photoUrls = [];
+
+  /// 写真URL
+  String _photoUrl;
 
   // コンストラクタ
-  ExerciseList({required this.exerciseList});
+  ExerciseList(this._photoUrl, {required this.exerciseList});
 
   // エクササイズリストの取得
   //
   // リストの要素は変更不可
   List<Exercise> get asList => List.unmodifiable(exerciseList);
 
-  // 写真URLリストの取得
-  List<String> get photoUrls => List.unmodifiable(_photoUrls);
+  // 写真URL取得
+  String get photoUrl => _photoUrl;
+
+  // 写真URL設定
+  set photoUrl(String url) {
+    _photoUrl = url;
+    notifyListeners();
+  }
 
   // エクササイズの追加
   void add(Exercise exercise) {
@@ -40,18 +50,6 @@ class ExerciseList extends ChangeNotifier {
     }
   }
 
-  // 写真URLの追加
-  void addPhotoUrl(String url) {
-    _photoUrls.add(url);
-    notifyListeners();
-  }
-
-  // 写真URLの削除
-  void removePhotoUrl(String url) {
-    _photoUrls.remove(url);
-    notifyListeners();
-  }
-
   // エクササイズの数を取得
   int get length => exerciseList.length;
 
@@ -60,4 +58,51 @@ class ExerciseList extends ChangeNotifier {
 
   // エクササイズが空でないかどうかを確認
   bool get isNotEmpty => exerciseList.isNotEmpty;
+
+  // TODO: 以下のSampleデータとSampleメソッドは削除予定です
+  // リファクタリング完了後に削除してください
+  // 元のファイル: exercise_master.dart
+
+  // Sampleデータ: エクササイズのマスターデータ
+  static final List<Exercise> sampleExercises = [
+    Exercise(
+      id: '1',
+      name: 'ベンチプレス',
+      sets: List.generate(3, (_) => ExerciseSet()),
+    ),
+    Exercise(
+      id: '2',
+      name: 'スクワット',
+      sets: List.generate(3, (_) => ExerciseSet()),
+    ),
+    Exercise(
+      id: '3',
+      name: 'デッドリフト',
+      sets: List.generate(3, (_) => ExerciseSet()),
+    ),
+    Exercise(
+      id: '4',
+      name: 'ショルダープレス',
+      sets: List.generate(3, (_) => ExerciseSet()),
+    ),
+    Exercise(
+      id: '5',
+      name: 'ラットプルダウン',
+      sets: List.generate(3, (_) => ExerciseSet()),
+    ),
+  ];
+
+  // Sampleメソッド: エクササイズのマスターデータを取得
+  static List<Exercise> getSampleExercises() {
+    return List.unmodifiable(sampleExercises);
+  }
+
+  // Sampleメソッド: IDでエクササイズを取得
+  static Exercise? getSampleExerciseById(String id) {
+    try {
+      return sampleExercises.firstWhere((exercise) => exercise.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
 }

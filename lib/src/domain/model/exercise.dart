@@ -1,54 +1,34 @@
-class ExerciseSet {
-  final int reps;
-  final double weight;
-  final int restInterval;
+import 'exercise_set.dart';
 
-  ExerciseSet({
-    this.reps = 0,
-    this.weight = 0,
-    this.restInterval = 60,
-  });
-
-  ExerciseSet copyWith({
-    int? reps,
-    double? weight,
-    int? restInterval,
-  }) {
-    return ExerciseSet(
-      reps: reps ?? this.reps,
-      weight: weight ?? this.weight,
-      restInterval: restInterval ?? this.restInterval,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'reps': reps,
-      'weight': weight,
-      'restInterval': restInterval,
-    };
-  }
-
-  factory ExerciseSet.fromJson(Map<String, dynamic> json) {
-    return ExerciseSet(
-      reps: json['reps'] as int,
-      weight: json['weight'] as double,
-      restInterval: json['restInterval'] as int,
-    );
-  }
-}
-
+// エクササイズ記録のドメインモデル
 class Exercise {
+  /// エクササイズID
   final String id;
+
+  /// エクササイズ名
   final String name;
+
+  /// セットリスト
   final List<ExerciseSet> sets;
 
+  /// コンストラクタ
+  ///
+  /// [id] エクササイズID
+  /// [name] エクササイズ名
+  /// [sets] セットリスト
+  ///
   Exercise({
     required this.id,
     required this.name,
     List<ExerciseSet>? sets,
-  }) : sets = sets ?? List.generate(3, (_) => ExerciseSet());
+  }) : sets = sets ?? [ExerciseSet()];
 
+  /// コピー
+  ///
+  /// [id] エクササイズID
+  /// [name] エクササイズ名
+  /// [sets] セットリスト
+  ///
   Exercise copyWith({
     String? id,
     String? name,
@@ -61,14 +41,27 @@ class Exercise {
     );
   }
 
+  /// JSONに変換
+  ///
+  /// エクササイズのJSON表現を返す
+  ///
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'sets': sets.map((set) => set.toJson()).toList(),
-    };
+    try {
+      return {
+        'id': id,
+        'name': name,
+        'sets': sets.map((set) => set.toJson()).toList(),
+      };
+    } catch (e) {
+      print('ExerciseのtoJsonでエラーが発生しました: $e');
+      rethrow;
+    }
   }
 
+  /// JSONからエクササイズを作成
+  ///
+  /// [json] JSON表現
+  ///
   factory Exercise.fromJson(Map<String, dynamic> json) {
     return Exercise(
       id: json['id'] as String,
@@ -79,7 +72,10 @@ class Exercise {
     );
   }
 
-  // セット数を変更する
+  /// セット数を変更する
+  ///
+  /// [count] セット数
+  ///
   Exercise updateSetCount(int count) {
     if (count < 1) count = 1;
     final newSets = List.generate(
@@ -89,7 +85,11 @@ class Exercise {
     return copyWith(sets: newSets);
   }
 
-  // 特定のセットを更新する
+  /// 特定のセットを更新する
+  ///
+  /// [index] セットのインデックス
+  /// [newSet] 新しいセット
+  ///
   Exercise updateSet(int index, ExerciseSet newSet) {
     if (index < 0 || index >= sets.length) return this;
     final newSets = List<ExerciseSet>.from(sets);
