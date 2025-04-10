@@ -5,6 +5,7 @@ import 'package:training_log_app/src/domain/repository/training_session_reposito
 class TrainingSessionService {
   final TrainingSessionRepository _repository;
 
+  /// コンストラクタ
   TrainingSessionService(this._repository);
 
   /// トレーニングセッションを保存する
@@ -12,9 +13,9 @@ class TrainingSessionService {
     await _repository.saveTrainingSession(session);
   }
 
-  /// トレーニングセッションを取得する
-  Future<TrainingSession?> getTrainingSession(String id) async {
-    return await _repository.getTrainingSession(id);
+  /// 指定されたkey(userId + yyyyMMdd)に紐づくトレーニングセッションを取得する
+  Future<TrainingSession?> getTrainingSession(String key) async {
+    return await _repository.getTrainingSession(key);
   }
 
   /// すべてのトレーニングセッションを取得する
@@ -30,5 +31,11 @@ class TrainingSessionService {
   /// トレーニングセッションを削除する
   Future<void> deleteTrainingSession(String id) async {
     await _repository.deleteTrainingSession(id);
+  }
+
+  /// ユーザーIDと日付でトレーニングセッションを取得する
+  Future<TrainingSession?> getTrainingSessionByUserIdAndDate(
+      String userId, String date) async {
+    return await _repository.getTrainingSessionByUserIdAndDate(userId, date);
   }
 }

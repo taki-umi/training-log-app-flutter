@@ -1,13 +1,21 @@
 // エクササイズセットのドメインモデル
 class ExerciseSet {
+  // 回数
   final int reps;
+  // 重量
   final double weight;
+  // 休憩時間
   final int restInterval;
 
+  // コンストラクタ
+  //
+  // reps: 回数, 初期値は0
+  // weight: 重量, 初期値は0.0
+  // restInterval: 休憩時間, 初期値は0
   ExerciseSet({
     this.reps = 0,
-    this.weight = 0,
-    this.restInterval = 60,
+    this.weight = 0.0,
+    this.restInterval = 0,
   });
 
   ExerciseSet copyWith({

@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:training_log_app/src/domain/model/exercise.dart';
 import 'package:training_log_app/src/domain/model/exercise_list.dart';
 import 'package:training_log_app/src/domain/model/exercise_set.dart';
+import 'package:training_log_app/src/domain/model/exercise_set_list.dart';
 
+/// トレーニングフォームのエクササイズ入力コンポーネント
 class ExerciseInput extends StatelessWidget {
+  // TODO: エクササイズ入力用のモデルを作成して、使用するようにする、重量と回数のフィールド型はStringにする予定
   final Exercise exercise;
   final ExerciseList exerciseList;
 
@@ -15,6 +18,9 @@ class ExerciseInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String textWeight = '';
+    String textReps = '';
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 4.0),
       child: Padding(
@@ -55,7 +61,7 @@ class ExerciseInput extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               itemCount: exercise.sets.length,
               itemBuilder: (context, index) {
-                final set = exercise.sets[index];
+                final set = exercise.sets.asList[index];
                 return Dismissible(
                   key: Key('set_${exercise.id}_$index'),
                   direction: DismissDirection.endToStart,
@@ -69,30 +75,14 @@ class ExerciseInput extends StatelessWidget {
                       );
                       return false;
                     }
-                    return await showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text('セットの削除'),
-                          content: const Text('このセットを削除してもよろしいですか？'),
-                          actions: <Widget>[
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(false),
-                              child: const Text('キャンセル'),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(true),
-                              child: const Text('削除'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
+                    return true;
                   },
                   onDismissed: (direction) {
-                    final newSets = List<ExerciseSet>.from(exercise.sets)
+                    final newSets = List<ExerciseSet>.from(exercise.sets.asList)
                       ..removeAt(index);
-                    final updatedExercise = exercise.copyWith(sets: newSets);
+                    final updatedExercise = exercise.copyWith(
+                      sets: ExerciseSetList(setList: newSets),
+                    );
                     exerciseList.update(updatedExercise);
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -129,6 +119,7 @@ class ExerciseInput extends StatelessWidget {
                           child: Row(
                             children: [
                               Expanded(
+                                // TODO: 重量フォームの入力しにくさを改善する
                                 child: TextField(
                                   decoration: const InputDecoration(
                                     labelText: 'kg',
@@ -140,13 +131,21 @@ class ExerciseInput extends StatelessWidget {
                                   ),
                                   keyboardType: TextInputType.number,
                                   controller: TextEditingController(
-                                    text: set.weight > 0
-                                        ? set.weight.toString()
-                                        : '',
-                                  ),
+                                      text: set.weight > 0
+                                          ? set.weight.toString()
+                                          : '')
+                                    ..selection = TextSelection.fromPosition(
+                                        TextPosition(
+                                            offset: set.weight > 0
+                                                ? set.weight.toString().length -
+                                                    2 // 整数部分にフォーカス
+                                                : 0)),
                                   onChanged: (value) {
-                                    final weight = double.tryParse(value) ?? 0;
-                                    final newSet = set.copyWith(weight: weight);
+                                    textWeight = value;
+                                    final newWeight =
+                                        double.tryParse(textWeight) ?? 0.0;
+                                    final newSet =
+                                        set.copyWith(weight: newWeight);
                                     final updatedExercise =
                                         exercise.updateSet(index, newSet);
                                     exerciseList.update(updatedExercise);
@@ -169,12 +168,18 @@ class ExerciseInput extends StatelessWidget {
                                   ),
                                   keyboardType: TextInputType.number,
                                   controller: TextEditingController(
-                                    text:
-                                        set.reps > 0 ? set.reps.toString() : '',
-                                  ),
+                                      text: set.reps > 0
+                                          ? set.reps.toString()
+                                          : '')
+                                    ..selection = TextSelection.fromPosition(
+                                        TextPosition(
+                                            offset: set.reps > 0
+                                                ? set.reps.toString().length
+                                                : 0)),
                                   onChanged: (value) {
-                                    final reps = int.tryParse(value) ?? 0;
-                                    final newSet = set.copyWith(reps: reps);
+                                    textReps = value;
+                                    final newReps = int.tryParse(textReps) ?? 0;
+                                    final newSet = set.copyWith(reps: newReps);
                                     final updatedExercise =
                                         exercise.updateSet(index, newSet);
                                     exerciseList.update(updatedExercise);
@@ -193,9 +198,11 @@ class ExerciseInput extends StatelessWidget {
             Center(
               child: TextButton.icon(
                 onPressed: () {
-                  final newSets = List<ExerciseSet>.from(exercise.sets)
+                  final newSets = List<ExerciseSet>.from(exercise.sets.asList)
                     ..add(ExerciseSet());
-                  final updatedExercise = exercise.copyWith(sets: newSets);
+                  final updatedExercise = exercise.copyWith(
+                    sets: ExerciseSetList(setList: newSets),
+                  );
                   exerciseList.update(updatedExercise);
                 },
                 icon: const Icon(Icons.add, size: 16),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:training_log_app/src/core/components/base_page.dart';
 import 'package:training_log_app/src/domain/model/exercise_list.dart';
+import 'package:training_log_app/src/domain/model/exercise_set_list.dart';
 import 'package:training_log_app/src/domain/model/training_session.dart';
 import 'package:training_log_app/src/domain/service/training_session_service.dart';
 import 'package:training_log_app/src/features/training_form/components/exercise_input.dart';
@@ -172,13 +173,33 @@ class TrainingFormPage extends BasePage {
                               developer.log('トレーニングセッションの作成を開始',
                                   name: 'TrainingFormPage');
 
+                              // テキストから数値型に変換
+                              final convertedExerciseList = ExerciseList(
+                                '',
+                                exerciseList:
+                                    exerciseList.asList.map((exercise) {
+                                  final convertedSets =
+                                      exercise.sets.asList.map((set) {
+                                    return set.copyWith(
+                                      weight: set.weight,
+                                      reps: set.reps,
+                                    );
+                                  }).toList();
+
+                                  return exercise.copyWith(
+                                    sets:
+                                        ExerciseSetList(setList: convertedSets),
+                                  );
+                                }).toList(),
+                              );
+
                               // トレーニングセッションを作成
                               final session = TrainingSession(
                                 userId: 'USER01', // TODO: いったん仮でUSER_IDを固定
                                 trainingDate: date,
                                 startTime: '',
                                 endTime: '',
-                                exerciseList: exerciseList,
+                                exerciseList: convertedExerciseList,
                                 notes: '',
                                 photoUrl: '',
                               );

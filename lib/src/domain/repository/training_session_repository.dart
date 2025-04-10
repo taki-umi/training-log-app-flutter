@@ -8,6 +8,10 @@ abstract class TrainingSessionRepository {
   /// トレーニングセッションを取得する
   Future<TrainingSession?> getTrainingSession(String key);
 
+  /// ユーザーIDと日付でトレーニングセッションを取得する
+  Future<TrainingSession?> getTrainingSessionByUserIdAndDate(
+      String userId, String date);
+
   /// すべてのトレーニングセッションを取得する
   Future<List<TrainingSession>> getAllTrainingSessions();
 

@@ -1,4 +1,5 @@
 import 'exercise_set.dart';
+import 'exercise_set_list.dart';
 
 // エクササイズ記録のドメインモデル
 class Exercise {
@@ -9,7 +10,7 @@ class Exercise {
   final String name;
 
   /// セットリスト
-  final List<ExerciseSet> sets;
+  final ExerciseSetList sets;
 
   /// コンストラクタ
   ///
@@ -20,8 +21,8 @@ class Exercise {
   Exercise({
     required this.id,
     required this.name,
-    List<ExerciseSet>? sets,
-  }) : sets = sets ?? [ExerciseSet()];
+    ExerciseSetList? sets,
+  }) : sets = sets ?? ExerciseSetList(setList: [ExerciseSet()]);
 
   /// コピー
   ///
@@ -32,7 +33,7 @@ class Exercise {
   Exercise copyWith({
     String? id,
     String? name,
-    List<ExerciseSet>? sets,
+    ExerciseSetList? sets,
   }) {
     return Exercise(
       id: id ?? this.id,
@@ -50,7 +51,7 @@ class Exercise {
       return {
         'id': id,
         'name': name,
-        'sets': sets.map((set) => set.toJson()).toList(),
+        'sets': sets.asList.map((set) => set.toJson()).toList(),
       };
     } catch (e) {
       print('ExerciseのtoJsonでエラーが発生しました: $e');
@@ -66,9 +67,11 @@ class Exercise {
     return Exercise(
       id: json['id'] as String,
       name: json['name'] as String,
-      sets: (json['sets'] as List)
-          .map((set) => ExerciseSet.fromJson(set as Map<String, dynamic>))
-          .toList(),
+      sets: ExerciseSetList(
+        setList: (json['sets'] as List)
+            .map((set) => ExerciseSet.fromJson(set as Map<String, dynamic>))
+            .toList(),
+      ),
     );
   }
 
@@ -80,9 +83,9 @@ class Exercise {
     if (count < 1) count = 1;
     final newSets = List.generate(
       count,
-      (index) => index < sets.length ? sets[index] : ExerciseSet(),
+      (index) => index < sets.length ? sets.asList[index] : ExerciseSet(),
     );
-    return copyWith(sets: newSets);
+    return copyWith(sets: ExerciseSetList(setList: newSets));
   }
 
   /// 特定のセットを更新する
@@ -92,8 +95,8 @@ class Exercise {
   ///
   Exercise updateSet(int index, ExerciseSet newSet) {
     if (index < 0 || index >= sets.length) return this;
-    final newSets = List<ExerciseSet>.from(sets);
+    final newSets = List<ExerciseSet>.from(sets.asList);
     newSets[index] = newSet;
-    return copyWith(sets: newSets);
+    return copyWith(sets: ExerciseSetList(setList: newSets));
   }
 }

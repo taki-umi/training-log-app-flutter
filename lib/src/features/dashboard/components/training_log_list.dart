@@ -5,127 +5,78 @@ import 'package:training_log_app/src/persistence/training_firebase_repository.da
 import 'package:intl/intl.dart';
 
 class TrainingLogList extends StatefulWidget {
-  const TrainingLogList({super.key});
+  final DateTime selectedDate;
+
+  const TrainingLogList({
+    Key? key,
+    required this.selectedDate,
+  }) : super(key: key);
 
   @override
   State<TrainingLogList> createState() => _TrainingLogListState();
 }
 
 class _TrainingLogListState extends State<TrainingLogList> {
-  final TrainingSessionService _trainingService =
-      TrainingSessionService(TrainingFirebaseRepository());
+  late final TrainingSessionService _trainingService;
+  late Future<TrainingSession?> _sessionFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _trainingService = TrainingSessionService(TrainingFirebaseRepository());
+    _sessionFuture = _getTrainingSession();
+  }
+
+  @override
+  void didUpdateWidget(TrainingLogList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedDate != widget.selectedDate) {
+      _sessionFuture = _getTrainingSession();
+    }
+  }
+
+  Future<TrainingSession?> _getTrainingSession() {
+    return _trainingService.getTrainingSessionByUserIdAndDate(
+      'USER01',
+      DateFormat('yyyyMMdd').format(widget.selectedDate),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return listCard();
-  }
-
-  Widget listCard() {
-    return FutureBuilder<List<TrainingSession>>(
-      future: _trainingService.getAllTrainingSessions(),
+    return FutureBuilder<TrainingSession?>(
+      future: _sessionFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
+
         if (snapshot.hasError) {
-          return Center(
-            child: Text(
-              'エラーが発生しました: ${snapshot.error}',
-              style: const TextStyle(color: Colors.red),
-            ),
-          );
+          return Center(child: Text('エラーが発生しました: ${snapshot.error}'));
         }
-        if (snapshot.hasData) {
-          final sessions = snapshot.data!;
-          if (sessions.isEmpty) {
-            return const Center(
-              child: Text(
-                'トレーニング記録がありません',
-                style: TextStyle(fontSize: 16),
-              ),
+
+        final session = snapshot.data;
+        if (session == null) {
+          return const Center(child: Text('トレーニング記録がありません'));
+        }
+
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: session.exerciseList?.asList?.length ?? 0,
+          itemBuilder: (context, index) {
+            final exercise = session.exerciseList?.asList?[index];
+            if (exercise == null) {
+              return const SizedBox.shrink();
+            }
+            return ListTile(
+              title: Text(exercise.name),
+              subtitle: Text(exercise.sets.asList
+                  .map((set) => '${set.weight}kg x ${set.reps}回')
+                  .join(', ')),
+              trailing: Text(session.startTime),
             );
-          }
-          return ListView.builder(
-            itemCount: sessions.length,
-            itemBuilder: (context, index) {
-              final session = sessions[index];
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: ExpansionTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    child:
-                        const Icon(Icons.fitness_center, color: Colors.white),
-                  ),
-                  title: Text(
-                    DateFormat('yyyy/MM/dd').format(session.trainingDate),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  subtitle: Text(
-                    '${session.startTime} - ${session.endTime}',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (session.notes != null &&
-                              session.notes!.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 8.0),
-                              child: Text(
-                                'メモ: ${session.notes}',
-                                style: const TextStyle(
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                            ),
-                          const Text(
-                            'エクササイズ',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          ...session.exerciseList.asList.map((exercise) {
-                            return Card(
-                              margin: const EdgeInsets.only(bottom: 8),
-                              child: ListTile(
-                                title: Text(exercise.name),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: exercise.sets.map((set) {
-                                    return Text(
-                                      '${set.weight}kg × ${set.reps}回 (休憩: ${set.restInterval}秒)',
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        }
-        return const Center(
-          child: Text('データを取得できませんでした'),
+          },
         );
       },
     );

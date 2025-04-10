@@ -37,14 +37,48 @@ class TrainingFirebaseRepository implements TrainingSessionRepository {
   }
 
   @override
-  Future<TrainingSession?> getTrainingSession(String id) async {
+  Future<TrainingSession?> getTrainingSession(String key) async {
     try {
       final docSnapshot =
-          await _firestore.collection(_collectionPath).doc(id).get();
+          await _firestore.collection(_collectionPath).doc(key).get();
       if (!docSnapshot.exists) {
         return null;
       }
       return TrainingSession.fromJson(docSnapshot.data()!);
+    } catch (e) {
+      throw Exception('トレーニングセッションの取得に失敗しました: $e');
+    }
+  }
+
+  @override
+  Future<TrainingSession?> getTrainingSessionByUserIdAndDate(
+      String userId, String date) async {
+    try {
+      // 日付文字列（YYYYMMDD）をDateTime型に変換
+      final dateTime = DateTime.parse(
+        '${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(6, 8)}',
+      );
+
+      // 日時部分を0:00:00と23:59:59に設定
+      final startDateTime =
+          DateTime(dateTime.year, dateTime.month, dateTime.day);
+      final endDateTime =
+          DateTime(dateTime.year, dateTime.month, dateTime.day, 23, 59, 59);
+      final startTime = Timestamp.fromDate(startDateTime);
+      final endTime = Timestamp.fromDate(endDateTime);
+
+      final querySnapshot = await _firestore
+          .collection(_collectionPath)
+          .where('userId', isEqualTo: userId)
+          .where('trainingDate', isGreaterThanOrEqualTo: startTime)
+          .where('trainingDate', isLessThanOrEqualTo: endTime)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        return null;
+      }
+
+      return TrainingSession.fromJson(querySnapshot.docs.first.data());
     } catch (e) {
       throw Exception('トレーニングセッションの取得に失敗しました: $e');
     }

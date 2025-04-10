@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:training_log_app/src/domain/model/exercise.dart';
 import 'package:training_log_app/src/domain/model/exercise_list.dart';
 import 'package:training_log_app/src/domain/model/exercise_set.dart';
+import 'package:training_log_app/src/domain/model/exercise_set_list.dart';
+import 'package:training_log_app/src/features/training_form/components/_exercise_master.dart';
 
-// ExerciseMasterSampleクラスをインポート
-import 'package:training_log_app/src/domain/model/exercise_list.dart'
-    show ExerciseMasterSample;
-
+/// トレーニング新規追加画面 - [＋種目を追加] - エクササイズ選択モーダル
 class ExerciseSelectionModal extends StatelessWidget {
+  /// エクササイズリスト
   final ExerciseList exerciseList;
 
+  /// コンストラクタ
   const ExerciseSelectionModal({
     super.key,
     required this.exerciseList,
@@ -17,7 +18,9 @@ class ExerciseSelectionModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final exercises = ExerciseList.getSampleExercises();
+    // エクササイズのマスターデータを取得
+    // TODO: マスターデータは、いずれはFirebaseから取得するようにする予定
+    final exercises = ExerciseMaster.getSampleExercises();
 
     return Container(
       decoration: const BoxDecoration(
@@ -101,7 +104,7 @@ class ExerciseSelectionModal extends StatelessWidget {
                     final newExercise = Exercise(
                       id: DateTime.now().millisecondsSinceEpoch.toString(),
                       name: exercise.name,
-                      sets: [ExerciseSet()],
+                      sets: ExerciseSetList(setList: [ExerciseSet()]),
                     );
                     exerciseList.add(newExercise);
                     Navigator.pop(context);
