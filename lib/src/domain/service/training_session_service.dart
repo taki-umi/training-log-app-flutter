@@ -20,7 +20,7 @@ class TrainingSessionService {
 
   /// すべてのトレーニングセッションを取得する
   Future<List<TrainingSession>> getAllTrainingSessions() async {
-    return await _repository.getAllTrainingSessions();
+    return await _repository.getTrainingSessions();
   }
 
   /// トレーニングセッションを更新する
@@ -37,5 +37,9 @@ class TrainingSessionService {
   Future<TrainingSession?> getTrainingSessionByUserIdAndDate(
       String userId, String date) async {
     return await _repository.getTrainingSessionByUserIdAndDate(userId, date);
+  }
+
+  Future<List<TrainingSession>> getTrainingSessions() async {
+    return await _repository.getTrainingSessions();
   }
 }

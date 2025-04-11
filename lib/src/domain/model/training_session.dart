@@ -22,29 +22,28 @@ class TrainingSession {
   final ExerciseList exerciseList;
 
   /// メモ
-  final String? notes;
+  final String notes;
 
   /// 写真URLリスト
-  final String? photoUrl;
+  final String photoUrl;
 
   /// コンストラクタ
   ///
-  /// param id: トレーニングセッションID 必須
   /// param userId: ユーザーID 必須
   /// param trainingDate: トレーニング日付 必須
   /// param startTime: トレーニング開始時間 必須
   /// param endTime: トレーニング終了時間 必須
   /// param exerciseList: エクササイズリスト 必須
-  /// param notes: メモ
-  /// param photoUrl: 写真URLリスト
-  TrainingSession({
+  /// param notes: メモ 必須
+  /// param photoUrl: 写真URLリスト 必須
+  const TrainingSession({
     required this.userId,
     required this.trainingDate,
     required this.startTime,
     required this.endTime,
     required this.exerciseList,
-    this.notes,
-    this.photoUrl,
+    required this.notes,
+    required this.photoUrl,
   });
 
   /// トレーニングセッションのキーを取得する
@@ -60,10 +59,10 @@ class TrainingSession {
 
       final data = {
         'userId': userId,
-        'trainingDate': Timestamp.fromDate(trainingDate),
+        'trainingDate': trainingDate.toIso8601String(),
         'startTime': startTime,
         'endTime': endTime,
-        'exerciseList': exerciseList.asList.map((e) => e.toJson()).toList(),
+        'exerciseList': exerciseList.toJson(),
         'notes': notes,
         'photoUrl': photoUrl,
       };
@@ -84,15 +83,22 @@ class TrainingSession {
   /// JSONからトレーニングセッションを生成する
   /// 主にFirebaseからのデータ取得時にドメインモデルに変換するために使用する
   factory TrainingSession.fromJson(Map<String, dynamic> json) {
+    DateTime parseDate(dynamic value) {
+      if (value is Timestamp) {
+        return value.toDate();
+      } else if (value is String) {
+        return DateTime.parse(value);
+      } else {
+        throw FormatException('日付の形式が不正です: $value');
+      }
+    }
+
     return TrainingSession(
       userId: json['userId'] as String,
-      trainingDate: (json['trainingDate'] as Timestamp).toDate(),
+      trainingDate: parseDate(json['trainingDate']),
       startTime: json['startTime'] as String,
       endTime: json['endTime'] as String,
-      exerciseList: ExerciseList('',
-          exerciseList: (json['exerciseList'] as List)
-              .map((e) => Exercise.fromJson(e as Map<String, dynamic>))
-              .toList()),
+      exerciseList: ExerciseList.fromJson(json),
       notes: json['notes'] as String,
       photoUrl: json['photoUrl'] as String,
     );
@@ -103,7 +109,7 @@ class TrainingSession {
     DateTime? trainingDate,
     String? startTime,
     String? endTime,
-    List<Exercise>? exercises,
+    ExerciseList? exerciseList,
     String? notes,
     String? photoUrl,
   }) {
@@ -112,9 +118,7 @@ class TrainingSession {
       trainingDate: trainingDate ?? this.trainingDate,
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,
-      exerciseList: exercises != null
-          ? ExerciseList('', exerciseList: exercises)
-          : this.exerciseList,
+      exerciseList: exerciseList ?? this.exerciseList,
       notes: notes ?? this.notes,
       photoUrl: photoUrl ?? this.photoUrl,
     );

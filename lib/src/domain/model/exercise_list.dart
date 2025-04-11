@@ -59,4 +59,20 @@ class ExerciseList extends ChangeNotifier {
 
   /// エクササイズが空でないかどうかを確認
   bool get isNotEmpty => exerciseList.isNotEmpty;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'photoUrl': _photoUrl,
+      'exerciseList': exerciseList.map((e) => e.toJson()).toList(),
+    };
+  }
+
+  factory ExerciseList.fromJson(Map<String, dynamic> json) {
+    return ExerciseList(
+      json['photoUrl'] as String,
+      exerciseList: (json['exerciseList'] as List)
+          .map((e) => Exercise.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
 }

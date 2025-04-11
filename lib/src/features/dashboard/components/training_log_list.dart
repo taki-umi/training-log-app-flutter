@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:training_log_app/src/domain/model/training_session.dart';
-import 'package:training_log_app/src/domain/service/training_session_service.dart';
-import 'package:training_log_app/src/persistence/training_firebase_repository.dart';
 import 'package:intl/intl.dart';
 
 class TrainingLogList extends StatefulWidget {
   final DateTime selectedDate;
+  final TrainingSession? trainingSession;
 
   const TrainingLogList({
     Key? key,
     required this.selectedDate,
+    this.trainingSession,
   }) : super(key: key);
 
   @override
@@ -17,68 +17,60 @@ class TrainingLogList extends StatefulWidget {
 }
 
 class _TrainingLogListState extends State<TrainingLogList> {
-  late final TrainingSessionService _trainingService;
-  late Future<TrainingSession?> _sessionFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _trainingService = TrainingSessionService(TrainingFirebaseRepository());
-    _sessionFuture = _getTrainingSession();
-  }
-
-  @override
-  void didUpdateWidget(TrainingLogList oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.selectedDate != widget.selectedDate) {
-      _sessionFuture = _getTrainingSession();
-    }
-  }
-
-  Future<TrainingSession?> _getTrainingSession() {
-    return _trainingService.getTrainingSessionByUserIdAndDate(
-      'USER01',
-      DateFormat('yyyyMMdd').format(widget.selectedDate),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<TrainingSession?>(
-      future: _sessionFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    if (widget.trainingSession == null) {
+      return const Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Center(child: Text('トレーニング記録がありません')),
+      );
+    }
 
-        if (snapshot.hasError) {
-          return Center(child: Text('エラーが発生しました: ${snapshot.error}'));
-        }
+    final session = widget.trainingSession!;
+    final dateFormat = DateFormat('yyyy年MM月dd日');
+    final formattedDate = dateFormat.format(widget.selectedDate);
 
-        final session = snapshot.data;
-        if (session == null) {
-          return const Center(child: Text('トレーニング記録がありません'));
-        }
-
-        return ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: session.exerciseList?.asList?.length ?? 0,
-          itemBuilder: (context, index) {
-            final exercise = session.exerciseList?.asList?[index];
-            if (exercise == null) {
-              return const SizedBox.shrink();
-            }
-            return ListTile(
-              title: Text(exercise.name),
-              subtitle: Text(exercise.sets.asList
-                  .map((set) => '${set.weight}kg x ${set.reps}回')
-                  .join(', ')),
-              trailing: Text(session.startTime),
-            );
-          },
-        );
-      },
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 8),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: session.exerciseList.asList.length,
+            itemBuilder: (context, index) {
+              final exercise = session.exerciseList.asList[index];
+              return Card(
+                margin: const EdgeInsets.only(bottom: 8.0),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        exercise.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      ...exercise.sets.asList.map((set) {
+                        return Padding(
+                          padding:
+                              const EdgeInsets.only(left: 16.0, bottom: 4.0),
+                          child: Text('${set.weight}kg × ${set.reps}回'),
+                        );
+                      }).toList(),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }

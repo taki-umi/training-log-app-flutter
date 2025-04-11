@@ -12,7 +12,14 @@ import 'package:intl/intl.dart';
 import 'dart:developer' as developer;
 
 class TrainingFormPage extends BasePage {
-  const TrainingFormPage({super.key});
+  final TrainingSession? trainingSession;
+  final bool isEditMode;
+
+  const TrainingFormPage({
+    super.key,
+    this.trainingSession,
+    this.isEditMode = false,
+  });
 
   String _formatDate(DateTime date) {
     final formatter = DateFormat.yMMMEd('ja_JP');
@@ -30,11 +37,18 @@ class TrainingFormPage extends BasePage {
       child: Builder(
         builder: (context) {
           final exerciseList = context.watch<ExerciseList>();
-          final date = DateTime.now();
+          final date = trainingSession?.trainingDate ?? DateTime.now();
 
           // トレーニングセッションサービスを初期化
           final repository = TrainingFirebaseRepository();
           final service = TrainingSessionService(repository);
+
+          // 編集モードの場合、既存のデータを読み込む
+          if (isEditMode && trainingSession != null) {
+            exerciseList.exerciseList.clear();
+            exerciseList.exerciseList
+                .addAll(trainingSession!.exerciseList.asList);
+          }
 
           return Scaffold(
             backgroundColor: Colors.white,
@@ -206,22 +220,32 @@ class TrainingFormPage extends BasePage {
 
                               developer.log('トレーニングセッションを作成しました',
                                   name: 'TrainingFormPage');
-                              developer.log('セッションデータ: ${session.toJson()}',
-                                  name: 'TrainingFormPage');
 
-                              // Firestoreに保存
-                              developer.log('Firestoreへの保存を開始',
-                                  name: 'TrainingFormPage');
-                              await service.saveTrainingSession(session);
-                              developer.log('Firestoreへの保存が完了しました',
-                                  name: 'TrainingFormPage');
+                              if (isEditMode && trainingSession != null) {
+                                // 編集モードの場合は更新
+                                final updatedSession =
+                                    trainingSession!.copyWith(
+                                  exerciseList: convertedExerciseList,
+                                );
+                                await service
+                                    .updateTrainingSession(updatedSession);
+                                developer.log('トレーニングセッションを更新しました',
+                                    name: 'TrainingFormPage');
+                              } else {
+                                // 新規作成モードの場合は保存
+                                await service.saveTrainingSession(session);
+                                developer.log('トレーニングセッションを保存しました',
+                                    name: 'TrainingFormPage');
+                              }
 
                               // 成功メッセージを表示
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('トレーニングを保存しました'),
-                                    duration: Duration(seconds: 2),
+                                  SnackBar(
+                                    content: Text(isEditMode
+                                        ? 'トレーニングを更新しました'
+                                        : 'トレーニングを保存しました'),
+                                    duration: const Duration(seconds: 2),
                                   ),
                                 );
 
@@ -246,9 +270,9 @@ class TrainingFormPage extends BasePage {
                               }
                             }
                           },
-                          child: const Text(
-                            'ワークアウト完了',
-                            style: TextStyle(
+                          child: Text(
+                            isEditMode ? '修正完了' : 'ワークアウト完了',
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
